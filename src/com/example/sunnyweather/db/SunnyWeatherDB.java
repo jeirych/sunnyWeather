@@ -19,16 +19,19 @@ public class SunnyWeatherDB {
 	public static final int VERSION = 1;
 	private static SunnyWeatherDB sunnyWeatherDB;
 	private SQLiteDatabase db;
-	public SunnyWeatherDB(Context context) {
+	//私有化构造方法
+	private SunnyWeatherDB(Context context) {
 		SunnyWeatherOpenHelper dbHelper = new SunnyWeatherOpenHelper(context, DB_NAME, null, VERSION);
 		db = dbHelper.getWritableDatabase();
 	}
+	//创建实例
 	public synchronized static SunnyWeatherDB getInstance(Context context) {
 		if(sunnyWeatherDB == null) {
 			sunnyWeatherDB = new SunnyWeatherDB(context);
 		}
 		return sunnyWeatherDB;
 	}
+	//保存省份信息
 	public void saveProvince(Province province){
 		if(province != null) {
 			ContentValues values = new ContentValues();
@@ -37,6 +40,7 @@ public class SunnyWeatherDB {
 			db.insert("Province", null, values);
 		}
 	}
+	//保存城市信息
 	public void saveCity(City city){
 		if(city != null) {
 			ContentValues values = new ContentValues();
@@ -46,15 +50,17 @@ public class SunnyWeatherDB {
 			db.insert("City", null, values);
 		}
 	}
+	//保存县信息
 	public void saveCountry(Country country){
 		if(country != null) {
 			ContentValues values = new ContentValues();
 			values.put("country_name", country.getCountryName());
 			values.put("country_code", country.getCountryCode());
 			values.put("city_id", country.getCityId());
-			db.insert("City", null, values);
+			db.insert("Country", null, values);
 		}
 	}
+	//遍历省份信息
 	public List<Province> loadProvinces() {
 		List<Province> list = new ArrayList<>();
 		Cursor cursor = db.query("Province", null, null, null, null, null, null);
@@ -67,10 +73,12 @@ public class SunnyWeatherDB {
 				list.add(province);
 			}while(cursor.moveToNext());
 		}
-		if(cursor!= null)		
+		if(cursor!= null){
 			cursor.close();
-         return list;
+		}		
+         	return list;
 	}
+	//注意命名规范：City 的复数为 Cities
 	public List<City> loadCitys() {
 		List<City> list = new ArrayList<>();
 		Cursor cursor = db.query("City", null, null, null, null, null, null);
@@ -80,7 +88,7 @@ public class SunnyWeatherDB {
 				city.setId(cursor.getInt(cursor.getColumnIndex("id")));
 				city.setCityCode(cursor.getString(cursor.getColumnIndex("city_code")));
 				city.setCityName(cursor.getString(cursor.getColumnIndex("city_name")));
-				city.setProvinceId(cursor.getInt(cursor.getColumnIndex("province_id")));
+				city.setProvinceId(provinceId);
 				list.add(city);
 			}while(cursor.moveToNext());
 		}
@@ -88,6 +96,7 @@ public class SunnyWeatherDB {
 			cursor.close();
          return list;
 	}
+	//注意命名规范：Country 的复数为 Countries
 	public List<Country> loadCountrys() {
 		List<Country> list = new ArrayList<>();
 		Cursor cursor = db.query("Country", null, null, null, null, null, null);
@@ -97,7 +106,7 @@ public class SunnyWeatherDB {
 				country.setId(cursor.getInt(cursor.getColumnIndex("id")));
 				country.setCountryCode(cursor.getString(cursor.getColumnIndex("country_code")));
 				country.setCountryName(cursor.getString(cursor.getColumnIndex("country_name")));
-				country.setCityId(cursor.getInt(cursor.getColumnIndex("city_id")));
+				country.setCityId(cityId);
 				list.add(country);
 			}while(cursor.moveToNext());
 		}
